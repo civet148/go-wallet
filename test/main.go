@@ -1,12 +1,5 @@
-# go wallet
-golang blockchain wallet wrapper 
+package main
 
-- generate address, phrase, private key, public key
-- sign and verify message
-
-# example
-
-```go
 import (
 	"github.com/civet148/go-wallet"
 	"github.com/civet148/log"
@@ -40,5 +33,3 @@ func main() {
 		log.Infof("verify signature ok")
 	}
 }
-
-```
