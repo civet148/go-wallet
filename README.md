@@ -16,15 +16,15 @@ func main() {
 
 	//create a new wallet
 	var wc = wallet.NewWalletEthereum()
-	log.Infof("[WALLET CREATE] did [%s] private key [%s] public key [%s] phrase [%s]", wc.GetAddress(), wc.GetPrivateKey(), wc.GetPublicKey(), wc.GetPhrase())
+	log.Infof("[WALLET CREATE] address [%s] private key [%s] public key [%s] phrase [%s]", wc.GetAddress(), wc.GetPrivateKey(), wc.GetPublicKey(), wc.GetPhrase())
 
 	//recover a wallet from phrase
 	var wr = wallet.NewWalletEthereum(wc.GetPhrase())
-	log.Infof("[WALLET RECOVER] did [%s] private key [%s] public key [%s] phrase [%s]", wr.GetAddress(), wr.GetPrivateKey(), wr.GetPublicKey(), wr.GetPhrase())
+	log.Infof("[WALLET RECOVER] address [%s] private key [%s] public key [%s] phrase [%s]", wr.GetAddress(), wr.GetPrivateKey(), wr.GetPublicKey(), wr.GetPhrase())
 
 	//load a wallet from address, private key, public key and phrase (if you only have a public key, you just can verify signature)
 	var wl = wallet.NewWalletEthereum(wc.GetAddress(), "", wc.GetPublicKey(), "")
-	log.Infof("[WALLET LOAD] did [%s] private key [%s] public key [%s] phrase [%s]", wl.GetAddress(), wl.GetPrivateKey(), wl.GetPublicKey(), wl.GetPhrase())
+	log.Infof("[WALLET LOAD] address [%s] private key [%s] public key [%s] phrase [%s]", wl.GetAddress(), wl.GetPrivateKey(), wl.GetPublicKey(), wl.GetPhrase())
 
 	var strHelloWorld = "hello world"
 	strSigned, err := wc.SignText([]byte(strHelloWorld))

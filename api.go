@@ -13,8 +13,8 @@ type Wallet interface {
 	VerifyHash(digitBytes []byte, strSignature string) bool      //verify hash bytes (32bytes) signature from a hex encoded signature
 	SignText(text []byte) (strSignature string, err error)       //sign text bytes and return a hex signature string
 	VerifyText(text []byte, strSignature string) bool            //verify text bytes signature from a hex encoded signature
-	GetPrivateKey() string
-	GetPublicKey() string
-	GetAddress() string
-	GetPhrase() string
+	GetPrivateKey() string                                       //retrieve private key (hex string)
+	GetPublicKey() string                                        //retrieve public key (hex string)
+	GetAddress() string                                          //retrieve address key (hex string)
+	GetPhrase() string                                           //retrieve phrase key (hex string)
 }
