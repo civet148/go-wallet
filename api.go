@@ -1,8 +1,6 @@
 package wallet
 
 const (
-	ArgNumPhrase   = 1
-	ArgNumFull     = 4
 	DefaultBitSize = 128
 )
 
