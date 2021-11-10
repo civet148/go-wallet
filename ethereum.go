@@ -4,7 +4,6 @@ import (
 	"crypto/ecdsa"
 	"crypto/sha256"
 	"encoding/hex"
-	"fmt"
 	"github.com/civet148/log"
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -36,26 +35,26 @@ type walletAccount struct {
 	account   accounts.Account
 }
 
-func NewWalletEthereum(args ...string) Wallet {
-	n := len(args)
+func NewWalletEthereum(op OpType, args ...string) Wallet {
 	w := &WalletEthereum{}
-	if n > 0 {
-		if n != ArgNumPhrase && n != ArgNumFull {
-			err := fmt.Errorf("args want 1 (phrase) or 4 (did, private key, public key, pharse) but got %d", n)
-			panic(err.Error())
-		} else {
-			if n == ArgNumPhrase { //only phrase
-				return w.Recover(args[0])
-			} else { //full
-				w.Address = args[0]
-				w.PrivateKey = args[1]
-				w.PublicKey = args[2]
-				w.Phrase = args[3]
-				return w
-			}
+	switch op {
+	case OpType_Load:
+		{
+			w.Address = args[0]
+			w.PrivateKey = args[1]
+			w.PublicKey = args[2]
+			w.Phrase = args[3]
+		}
+	case OpType_Create:
+		return w.Create()
+	case OpType_Recover:
+		return w.Recover(args[0])
+	case OpType_Verify:
+		{
+			w.PublicKey = args[0]
 		}
 	}
-	return w.Create()
+	return w
 }
 
 func (m *WalletEthereum) Create() Wallet {

@@ -1,6 +1,8 @@
 package wallet
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"github.com/civet148/log"
 	"net/url"
@@ -13,8 +15,6 @@ const (
 	TAG_VALUE_IGNORE = "-"
 	TAG_NAME_JSON    = "json"
 )
-
-var ExceptSignTags = []string{"sign", "signature"}
 
 var tagNames = []string{TAG_NAME_JSON}
 
@@ -49,6 +49,12 @@ func MakeSignString(obj interface{}, excepts ...string) string {
 		}
 	}
 	return strSort
+}
+
+func MakeSignSHA256(obj interface{}, excepts ...string) string {
+	strToSign := MakeSignString(obj, excepts...)
+	digestHash := sha256.Sum256([]byte(strToSign))
+	return hex.EncodeToString(digestHash[:])
 }
 
 func makeSignStringByStruct(typ reflect.Type, val reflect.Value, excepts ...string) string {
@@ -120,17 +126,7 @@ func saveValueByField(dic map[string]interface{}, field reflect.StructField, val
 		if tagVal == "" {
 			tagVal = field.Name
 		}
-
-		for _, strExcept := range ExceptSignTags {
-			if strings.ToLower(tagVal) == strExcept {
-				log.Debugf("ignore %+v tag", tagVal)
-				ignore = true
-				break
-			}
-		}
-		if !ignore {
-			dic[tagVal] = fmt.Sprintf("%v", val.Interface())
-		}
+		dic[tagVal] = fmt.Sprintf("%v", val.Interface())
 	}
 }
 
