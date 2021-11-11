@@ -51,10 +51,16 @@ func MakeSignString(obj interface{}, excepts ...string) string {
 	return strSort
 }
 
-func MakeSignSHA256(obj interface{}, excepts ...string) string {
+func MakeSignSHA256Hex(obj interface{}, excepts ...string) string {
 	strToSign := MakeSignString(obj, excepts...)
 	digestHash := sha256.Sum256([]byte(strToSign))
 	return hex.EncodeToString(digestHash[:])
+}
+
+func MakeSignSHA256(obj interface{}, excepts ...string) []byte {
+	strToSign := MakeSignString(obj, excepts...)
+	digestHash := sha256.Sum256([]byte(strToSign))
+	return digestHash[:]
 }
 
 func makeSignStringByStruct(typ reflect.Type, val reflect.Value, excepts ...string) string {

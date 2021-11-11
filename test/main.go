@@ -72,7 +72,7 @@ func main() {
 	}
 	log.Infof("map[string]interface{} to sign [%s]", wallet.MakeSignString(m))
 
-	log.Infof("struct to sign hash [%s]", wallet.MakeSignSHA256(person))
-	log.Infof("url.values to sign hash [%s]", wallet.MakeSignSHA256(values))
-	log.Infof("map[string]interface{} to sign hash [%s]", wallet.MakeSignSHA256(m))
+	log.Infof("struct to sign hash [%s]", wallet.MakeSignSHA256Hex(person))
+	log.Infof("url.values to sign hash [%s]", wallet.MakeSignSHA256Hex(values))
+	log.Infof("map[string]interface{} to sign hash [%s]", wallet.MakeSignSHA256Hex(m))
 }
