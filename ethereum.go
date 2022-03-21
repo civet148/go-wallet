@@ -113,9 +113,14 @@ func (m *WalletEthereum) SignHash(digestHash []byte) (strSignature string, err e
 	return hex.EncodeToString(sign), nil
 }
 
-func (m *WalletEthereum) SignText(text []byte) (strSignature string, err error) {
+func (m *WalletEthereum) SignText(text []byte) (strMsgHash, strSignature string, err error) {
 	digestHash := sha256.Sum256(text)
-	return m.SignHash(digestHash[:])
+	strMsgHash = hex.EncodeToString(digestHash[:])
+	if strSignature, err = m.SignHash(digestHash[:]); err != nil {
+		log.Errorf("sign hash error [%s]", err)
+		return
+	}
+	return
 }
 
 func (m *WalletEthereum) verify(pubKey []byte, digestHash []byte, signature []byte) bool {
