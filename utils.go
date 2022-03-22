@@ -1,10 +1,16 @@
 package wallet
 
 import (
+	"crypto/sha256"
 	"encoding/hex"
 	"github.com/civet148/log"
 	"github.com/ethereum/go-ethereum/crypto"
 )
+
+func SignHash(text string) (strMsgHash string) {
+	digestHash := sha256.Sum256([]byte(text))
+	return hex.EncodeToString(digestHash[:])
+}
 
 func RecoverPubKey(strMsgHash, strSignature string) (string, error) {
 	hash, err := hex.DecodeString(strMsgHash)
