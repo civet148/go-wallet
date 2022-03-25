@@ -3,9 +3,29 @@ package wallet
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
 	"github.com/civet148/log"
 	"github.com/ethereum/go-ethereum/crypto"
 )
+
+func VerifyMessage(strAddress, strMsg, strSignature string) (bool, error) {
+
+	strHash := SignHash(strMsg)
+	strPubKey, err := RecoverPubKey(strHash, strSignature)
+	if err != nil {
+		log.Errorf(err.Error())
+		return false, err
+	}
+	strAddr, err := PublicKey2Address(strPubKey)
+	if err != nil {
+		log.Errorf(err.Error())
+		return false, err
+	}
+	if strAddr != strAddress {
+		return false, fmt.Errorf("verify message failed")
+	}
+	return true, nil
+}
 
 func SignHash(text string) (strMsgHash string) {
 	digestHash := sha256.Sum256([]byte(text))

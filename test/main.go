@@ -26,30 +26,18 @@ func main() {
 }
 
 func UtilTest() {
-
-	strAddr, err := wallet.PublicKey2Address(public_key)
-	if err != nil {
-		log.Errorf("PublicKey2Address error [%s]", err)
-		return
-	}
-	if strAddr != address {
-		log.Errorf("public key convert address [%s] not match [%s]", strAddr, address)
-		return
-	}
-	log.Infof("public key convert address [%s] match ok", strAddr)
-	var strPubKeyMatch = "03bba7449f02181303ac46b0c26ced45e1e9996044a8bfd0df3230743eb6bfb07a"
-	var strMsgHash = "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9"
+	var err error
+	var strAddress = "0x446DDa728Df7c3DDa88511f9622A9f6Ccb8c3b0F"
+	//var strPubKey = "03bba7449f02181303ac46b0c26ced45e1e9996044a8bfd0df3230743eb6bfb07a"
+	var strMsg = "hello world"
 	var strSignature = "a1c64956c16cb09eb9aef3a05a95b41ea0c9f70d78c5034357c135ac39fb08a337766033ad61c87bca068ad895b221dc37fda04fa181f5235e7077e5ad0aabcb00"
-	strPubKeyRecover, err := wallet.RecoverPubKey(strMsgHash, strSignature)
-	if err != nil {
-		log.Errorf("RecoverPubKey error [%s]", err)
+
+	var ok bool
+	if ok, err = wallet.VerifyMessage(strAddress, strMsg, strSignature); err != nil {
+		log.Errorf("%s", err)
 		return
 	}
-	if strPubKeyRecover != strPubKeyMatch {
-		log.Errorf("public key [%s] not match [%s]", strPubKeyRecover, strPubKeyMatch)
-		return
-	}
-	log.Infof("public key recover [%s] ok", strPubKeyRecover)
+	log.Infof("verify message [%v]", ok)
 }
 
 func WalletTest() {
