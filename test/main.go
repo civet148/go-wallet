@@ -22,14 +22,14 @@ type Person struct {
 
 func main() {
 	VerifySignatureKeccak256()
-	VerifySignatureSHA256()
+	//VerifySignatureSHA256()
 	//WalletSignAndVerify()
 }
 
 func VerifySignatureKeccak256() {
-	var strAddress = "0x90Cfd4D61C9D4C63f2e4648229775ABa19ced8dF"
-	var strMsg = "hello"
-	var strSignature = "0x1292e758c023e0dccffb48dad52a31aa7650d599820075829a75c305703f9389065448a425cd8d59fb7885415b9b647cdeae6ffa78ddca56fbeffbae84b2cebc1c"
+	var strAddress = "0x9a1ffdbba6062cc31e198eea59d900acd9baf583"
+	var strMsg = "asdasdasdasdasd"
+	var strSignature = "0x900417f764eca1eb254cc7b3ff08258a18530956120d6c547dc5ae736ffa35893f491ec9cf0d209f4a441b6de975d1303ae98842d8b6cdaee8e02a20bc14a9291b"
 
 	var ok bool
 	var err error

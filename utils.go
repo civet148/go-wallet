@@ -3,11 +3,11 @@ package wallet
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"fmt"
 	"github.com/civet148/log"
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
+	"strings"
 )
 
 func DecodeHexString(s string) (b []byte, err error) {
@@ -35,7 +35,7 @@ func VerifySignatureKeccak256(strAddress, strMsg, strSignature string) (bool, er
 		return false, err
 	}
 	recoveredAddr := crypto.PubkeyToAddress(*recovered)
-	return strAddress == recoveredAddr.Hex(), nil
+	return strings.EqualFold(strAddress, recoveredAddr.Hex()), nil
 }
 
 func VerifySignatureSHA256(strAddress, strMsg, strSignature string) (bool, error) {
@@ -50,10 +50,7 @@ func VerifySignatureSHA256(strAddress, strMsg, strSignature string) (bool, error
 		log.Errorf(err.Error())
 		return false, err
 	}
-	if strAddr != strAddress {
-		return false, fmt.Errorf("verify message failed")
-	}
-	return true, nil
+	return strings.EqualFold(strAddr, strAddress), nil
 }
 
 func SignHash(text string) (strMsgHash string) {
