@@ -20,21 +20,22 @@ func DecodeHexString(s string) (b []byte, err error) {
 	return
 }
 
-func VerifySignatureKeccak256(strAddress, strMsg, strSignature string) bool {
+func VerifySignatureKeccak256(strAddress, strMsg, strSignature string) (bool, error) {
 	sig, err := DecodeHexString(strSignature)
 	if err != nil {
 		log.Errorf("decode hex error [%s]", err)
-		return false
+		return false, err
 	}
 	msg := accounts.TextHash([]byte(strMsg))
 	sig[crypto.RecoveryIDOffset] -= 27 // Transform yellow paper V from 27/28 to 0/1
 
 	recovered, err := crypto.SigToPub(msg, sig)
 	if err != nil {
-		return false
+		log.Errorf("SigToPub error [%s]", err.Error())
+		return false, err
 	}
 	recoveredAddr := crypto.PubkeyToAddress(*recovered)
-	return strAddress == recoveredAddr.Hex()
+	return strAddress == recoveredAddr.Hex(), nil
 }
 
 func VerifySignatureSHA256(strAddress, strMsg, strSignature string) (bool, error) {
@@ -123,4 +124,3 @@ func PublicKey2Address(strPublicKey string) (string, error) {
 	addr := crypto.PubkeyToAddress(*pubKeyECDSA)
 	return addr.Hex(), nil
 }
-

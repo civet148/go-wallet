@@ -27,15 +27,13 @@ func main() {
 }
 
 func VerifySignatureKeccak256() {
-	//var strAddress = "0x0EaE3eF6CC7176553E6B45d94e9eFDE2Da7B82a5"
-	//var strMsg = "Example `personal_sign` message"
-	//var strSignature = "0x34850b7e36e635783df0563c7202c3ac776df59db5015d2b6f0add33955bb5c43ce35efb5ce695a243bc4c5dc4298db40cd765f3ea5612d2d57da1e4933b2f201b"
 	var strAddress = "0x90Cfd4D61C9D4C63f2e4648229775ABa19ced8dF"
 	var strMsg = "hello"
 	var strSignature = "0x1292e758c023e0dccffb48dad52a31aa7650d599820075829a75c305703f9389065448a425cd8d59fb7885415b9b647cdeae6ffa78ddca56fbeffbae84b2cebc1c"
 
 	var ok bool
-	if ok = wallet.VerifySignatureKeccak256(strAddress, strMsg, strSignature); !ok {
+	var err error
+	if ok, err = wallet.VerifySignatureKeccak256(strAddress, strMsg, strSignature); err != nil {
 		log.Errorf("verify message failed")
 		return
 	}
