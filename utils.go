@@ -6,10 +6,18 @@ import (
 	"fmt"
 	"github.com/civet148/log"
 	"github.com/ethereum/go-ethereum/crypto"
+	"strings"
 )
 
-func VerifyMessage(strAddress, strMsg, strSignature string) (bool, error) {
+func trimPrefix(strIn string) string {
+	if strings.HasPrefix(strIn, "0x") {
+		strIn = strings.TrimPrefix(strIn, "0x")
+	}
+	return strIn
+}
 
+func VerifyMessage(strAddress, strMsg, strSignature string) (bool, error) {
+	strSignature = trimPrefix(strSignature)
 	strHash := SignHash(strMsg)
 	strPubKey, err := RecoverPubKey(strHash, strSignature)
 	if err != nil {
@@ -33,6 +41,7 @@ func SignHash(text string) (strMsgHash string) {
 }
 
 func RecoverPubKey(strMsgHash, strSignature string) (string, error) {
+	strSignature = trimPrefix(strSignature)
 	hash, err := hex.DecodeString(strMsgHash)
 	if err != nil {
 		log.Errorf("msg hash hex decode error [%s]", err.Error())

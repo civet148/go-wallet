@@ -30,7 +30,7 @@ func UtilTest() {
 	var strAddress = "0x446DDa728Df7c3DDa88511f9622A9f6Ccb8c3b0F"
 	//var strPubKey = "03bba7449f02181303ac46b0c26ced45e1e9996044a8bfd0df3230743eb6bfb07a"
 	var strMsg = "hello world"
-	var strSignature = "a1c64956c16cb09eb9aef3a05a95b41ea0c9f70d78c5034357c135ac39fb08a337766033ad61c87bca068ad895b221dc37fda04fa181f5235e7077e5ad0aabcb00"
+	var strSignature = "0xa1c64956c16cb09eb9aef3a05a95b41ea0c9f70d78c5034357c135ac39fb08a337766033ad61c87bca068ad895b221dc37fda04fa181f5235e7077e5ad0aabcb00"
 
 	var ok bool
 	if ok, err = wallet.VerifyMessage(strAddress, strMsg, strSignature); err != nil {
