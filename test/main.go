@@ -21,11 +21,25 @@ type Person struct {
 }
 
 func main() {
-	UtilTest()
-	//WalletTest()
+	VerifySignatureKeccak256()
+	VerifySignatureSHA256()
+	WalletSignAndVerify()
 }
 
-func UtilTest() {
+func VerifySignatureKeccak256() {
+	var strAddress = "0x0EaE3eF6CC7176553E6B45d94e9eFDE2Da7B82a5"
+	var strMsg = "Example `personal_sign` message"
+	var strSignature = "0x34850b7e36e635783df0563c7202c3ac776df59db5015d2b6f0add33955bb5c43ce35efb5ce695a243bc4c5dc4298db40cd765f3ea5612d2d57da1e4933b2f201b"
+
+	var ok bool
+	if ok = wallet.VerifySignatureKeccak256(strAddress, strMsg, strSignature); !ok {
+		log.Errorf("verify message failed")
+		return
+	}
+	log.Infof("verify message [%v]", ok)
+}
+
+func VerifySignatureSHA256() {
 	var err error
 	var strAddress = "0x446DDa728Df7c3DDa88511f9622A9f6Ccb8c3b0F"
 	//var strPubKey = "03bba7449f02181303ac46b0c26ced45e1e9996044a8bfd0df3230743eb6bfb07a"
@@ -33,14 +47,14 @@ func UtilTest() {
 	var strSignature = "0xa1c64956c16cb09eb9aef3a05a95b41ea0c9f70d78c5034357c135ac39fb08a337766033ad61c87bca068ad895b221dc37fda04fa181f5235e7077e5ad0aabcb00"
 
 	var ok bool
-	if ok, err = wallet.VerifyMessage(strAddress, strMsg, strSignature); err != nil {
+	if ok, err = wallet.VerifySignatureSHA256(strAddress, strMsg, strSignature); err != nil {
 		log.Errorf("%s", err)
 		return
 	}
 	log.Infof("verify message [%v]", ok)
 }
 
-func WalletTest() {
+func WalletSignAndVerify() {
 	//create a new wallet
 	var wc = wallet.NewWalletEthereum(wallet.OpType_Create)
 	log.Infof("[CREATE] address [%s] private key [%s] public key [%s] phrase [%s]", wc.GetAddress(), wc.GetPrivateKey(), wc.GetPublicKey(), wc.GetPhrase())

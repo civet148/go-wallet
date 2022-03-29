@@ -5,33 +5,41 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/civet148/log"
+	"github.com/ethereum/go-ethereum/accounts"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
-	"strings"
 )
 
-const (
-	HEX_PREFIX = "0x"
-)
-
-func trimHexPrefix(strIn string) string {
-	if hasTrimHexPrefix(strIn) {
-		strIn = strings.TrimPrefix(strIn, HEX_PREFIX)
+func DecodeHexString(s string) (b []byte, err error) {
+	if b, err = hexutil.Decode(s); err != nil {
+		if b, err = hex.DecodeString(s); err != nil {
+			log.Errorf(err.Error())
+			return nil, err
+		}
 	}
-	return strIn
+	return
 }
 
-func hasTrimHexPrefix(strIn string) bool {
-	if strings.HasPrefix(strIn, HEX_PREFIX) {
-		return true
+func VerifySignatureKeccak256(strAddress, strMsg, strSignature string) bool {
+	sig, err := DecodeHexString(strSignature)
+	if err != nil {
+		log.Errorf("decode hex error [%s]", err)
+		return false
 	}
-	return false
+	msg := accounts.TextHash([]byte(strMsg))
+	sig[crypto.RecoveryIDOffset] -= 27 // Transform yellow paper V from 27/28 to 0/1
+
+	recovered, err := crypto.SigToPub(msg, sig)
+	if err != nil {
+		return false
+	}
+	recoveredAddr := crypto.PubkeyToAddress(*recovered)
+	return strAddress == recoveredAddr.Hex()
 }
 
-func VerifyMessage(strAddress, strMsg, strSignature string) (bool, error) {
+func VerifySignatureSHA256(strAddress, strMsg, strSignature string) (bool, error) {
 
-	strSignature = trimHexPrefix(strSignature)
-	strHash := SignHash(strMsg)
-	strPubKey, err := RecoverPubKey(strHash, strSignature)
+	strPubKey, err := RecoverPubKeySHA256(strMsg, strSignature)
 	if err != nil {
 		log.Errorf(err.Error())
 		return false, err
@@ -52,20 +60,37 @@ func SignHash(text string) (strMsgHash string) {
 	return hex.EncodeToString(digestHash[:])
 }
 
-func RecoverPubKey(strMsgHash, strSignature string) (string, error) {
-	strMsgHash = trimHexPrefix(strMsgHash)
-	strSignature = trimHexPrefix(strSignature)
-	hash, err := hex.DecodeString(strMsgHash)
-	if err != nil {
-		log.Errorf("msg hash hex decode error [%s]", err.Error())
-		return "", err
-	}
-	signature, err := hex.DecodeString(strSignature)
-	if err != nil {
-		log.Errorf("signature hex decode error [%s]", err.Error())
-		return "", err
-	}
+func RecoverPubKeyKeccak256(strMsg, strSignature string) (string, error) {
 	var publicKey []byte
+	sig, err := DecodeHexString(strSignature)
+	if err != nil {
+		log.Errorf("decode hex error [%s]", err)
+		return "", err
+	}
+	msg := accounts.TextHash([]byte(strMsg))
+	sig[crypto.RecoveryIDOffset] -= 27 // Transform yellow paper V from 27/28 to 0/1
+
+	pubKeyECDSA, err := crypto.SigToPub(msg, sig)
+	if err != nil {
+		return "", err
+	}
+	publicKey = crypto.CompressPubkey(pubKeyECDSA)
+	return hex.EncodeToString(publicKey), nil
+}
+
+func RecoverPubKeySHA256(strMsg, strSignature string) (string, error) {
+	var publicKey []byte
+	strHash := SignHash(strMsg)
+	hash, err := DecodeHexString(strHash)
+	if err != nil {
+		log.Errorf("decode hex error [%s]", err)
+		return "", err
+	}
+	signature, err := DecodeHexString(strSignature)
+	if err != nil {
+		log.Errorf("decode hex error [%s]", err)
+		return "", err
+	}
 	pubKeyECDSA, err := crypto.SigToPub(hash, signature)
 	if err != nil {
 		log.Errorf("convert to ECDSA error [%s]", err)
@@ -76,10 +101,9 @@ func RecoverPubKey(strMsgHash, strSignature string) (string, error) {
 }
 
 func PublicKey2Address(strPublicKey string) (string, error) {
-	strPublicKey = trimHexPrefix(strPublicKey)
-	publicKey, err := hex.DecodeString(strPublicKey)
+	publicKey, err := DecodeHexString(strPublicKey)
 	if err != nil {
-		log.Errorf("hex decode [%s] error [%s]", strPublicKey, err)
+		log.Errorf("decode hex error [%s]", err)
 		return "", err
 	}
 	if len(publicKey) == compressedPubKeyLen {
@@ -99,3 +123,4 @@ func PublicKey2Address(strPublicKey string) (string, error) {
 	addr := crypto.PubkeyToAddress(*pubKeyECDSA)
 	return addr.Hex(), nil
 }
+
