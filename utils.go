@@ -9,15 +9,27 @@ import (
 	"strings"
 )
 
-func trimPrefix(strIn string) string {
-	if strings.HasPrefix(strIn, "0x") {
-		strIn = strings.TrimPrefix(strIn, "0x")
+const (
+	HEX_PREFIX = "0x"
+)
+
+func trimHexPrefix(strIn string) string {
+	if hasTrimHexPrefix(strIn) {
+		strIn = strings.TrimPrefix(strIn, HEX_PREFIX)
 	}
 	return strIn
 }
 
+func hasTrimHexPrefix(strIn string) bool {
+	if strings.HasPrefix(strIn, HEX_PREFIX) {
+		return true
+	}
+	return false
+}
+
 func VerifyMessage(strAddress, strMsg, strSignature string) (bool, error) {
-	strSignature = trimPrefix(strSignature)
+
+	strSignature = trimHexPrefix(strSignature)
 	strHash := SignHash(strMsg)
 	strPubKey, err := RecoverPubKey(strHash, strSignature)
 	if err != nil {
@@ -41,7 +53,8 @@ func SignHash(text string) (strMsgHash string) {
 }
 
 func RecoverPubKey(strMsgHash, strSignature string) (string, error) {
-	strSignature = trimPrefix(strSignature)
+	strMsgHash = trimHexPrefix(strMsgHash)
+	strSignature = trimHexPrefix(strSignature)
 	hash, err := hex.DecodeString(strMsgHash)
 	if err != nil {
 		log.Errorf("msg hash hex decode error [%s]", err.Error())
@@ -63,6 +76,7 @@ func RecoverPubKey(strMsgHash, strSignature string) (string, error) {
 }
 
 func PublicKey2Address(strPublicKey string) (string, error) {
+	strPublicKey = trimHexPrefix(strPublicKey)
 	publicKey, err := hex.DecodeString(strPublicKey)
 	if err != nil {
 		log.Errorf("hex decode [%s] error [%s]", strPublicKey, err)
