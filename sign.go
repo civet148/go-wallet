@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/civet148/log"
+	"github.com/ethereum/go-ethereum/accounts"
 	"net/url"
 	"reflect"
 	"sort"
@@ -51,13 +52,21 @@ func MakeSignString(obj interface{}, excepts ...string) string {
 	return strSort
 }
 
-func MakeSignSHA256Hex(obj interface{}, excepts ...string) string {
-	strToSign := MakeSignString(obj, excepts...)
-	digestHash := sha256.Sum256([]byte(strToSign))
-	return hex.EncodeToString(digestHash[:])
+func MakeHashKeccak256Hex(obj interface{}, excepts ...string) string {
+	return hex.EncodeToString(MakeHashKeccak256(obj, excepts...))
 }
 
-func MakeSignSHA256(obj interface{}, excepts ...string) []byte {
+func MakeHashKeccak256(obj interface{}, excepts ...string) []byte {
+	strToSign := MakeSignString(obj, excepts...)
+	digestHash := accounts.TextHash([]byte(strToSign))
+	return digestHash[:]
+}
+
+func MakeHashSHA256Hex(obj interface{}, excepts ...string) string {
+	return hex.EncodeToString(MakeHashSHA256(obj, excepts...))
+}
+
+func MakeHashSHA256(obj interface{}, excepts ...string) []byte {
 	strToSign := MakeSignString(obj, excepts...)
 	digestHash := sha256.Sum256([]byte(strToSign))
 	return digestHash[:]

@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/hex"
 	"github.com/civet148/go-wallet"
 	"github.com/civet148/log"
+	"github.com/ethereum/go-ethereum/accounts"
 )
 
 const (
@@ -21,9 +23,15 @@ type Person struct {
 }
 
 func main() {
-	VerifySignatureKeccak256()
+	SignMessage()
+	//VerifySignatureKeccak256()
 	//VerifySignatureSHA256()
 	//WalletSignAndVerify()
+}
+
+func SignMessage() {
+	var strMsg = "hellow"
+	log.Infof("MSG HASH [%s]", hex.EncodeToString(accounts.TextHash([]byte(strMsg))))
 }
 
 func VerifySignatureKeccak256() {
