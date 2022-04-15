@@ -8,6 +8,7 @@ import (
 )
 
 const (
+	helloworld  = "hello world"
 	address     = "0xae020dE214129224de8d34434064f114678eA6f9"
 	private_key = "e2905ff2ccaa680a53a5521843a6c6ff30a63e65864af18f5f112dcbd8ea462f"
 	public_key  = "02e17dcff5febb6d37b5c3da9044d5710749eba832d18eca24c8600419cc0eac22"
@@ -23,36 +24,42 @@ type Person struct {
 }
 
 func main() {
-	SignMessage()
-	//VerifySignatureKeccak256()
+	VerifySignatureKeccak256()
 	//VerifySignatureSHA256()
 	//WalletSignAndVerify()
 }
 
-func SignMessage() {
-	var strMsg = "hellow"
-	log.Infof("MSG HASH [%s]", hex.EncodeToString(accounts.TextHash([]byte(strMsg))))
-}
-
 func VerifySignatureKeccak256() {
-	var strAddress = "0x9a1ffdbba6062cc31e198eea59d900acd9baf583"
-	var strMsg = "asdasdasdasdasd"
-	var strSignature = "0x900417f764eca1eb254cc7b3ff08258a18530956120d6c547dc5ae736ffa35893f491ec9cf0d209f4a441b6de975d1303ae98842d8b6cdaee8e02a20bc14a9291b"
+	/*
+			{
+			  "address": "0x90Cfd4D61C9D4C63f2e4648229775ABa19ced8dF",
+			  "msg": "hello world",
+			  "hash": "d9eba16ed0ecae432b71fe008c98cc872bb4cc214d3220a36f365326cf807d68"
+		      "public_key":"023cd6123ca51e31614de89f025c765e215bcb8cba31ae674c3e100dd8d92d3767"
+			  "sig": "0983228ed80a496332c6719bf7377200dacf16558b2fb3946f2d8675c39b7e33283523e8772dd0c3e0cf3068e6ca1e347697af75eb654379d55c90fcb4f69eea1b",
+			  "version": "2"
+			}
+	*/
+	var strMsg = helloworld
+	log.Infof("hash [%s]", hex.EncodeToString(accounts.TextHash([]byte(strMsg))))
 
 	var ok bool
 	var err error
+	var strAddress = "0x90Cfd4D61C9D4C63f2e4648229775ABa19ced8dF"
+	var strSignature = "0983228ed80a496332c6719bf7377200dacf16558b2fb3946f2d8675c39b7e33283523e8772dd0c3e0cf3068e6ca1e347697af75eb654379d55c90fcb4f69eea1b"
+	strPubKey, _ := wallet.RecoverPubKeyKeccak256(strMsg, strSignature)
 	if ok, err = wallet.VerifySignatureKeccak256(strAddress, strMsg, strSignature); err != nil {
 		log.Errorf("verify message failed")
 		return
 	}
-	log.Infof("verify message [%v]", ok)
+	log.Infof("verify message [%v] public key [%s]", ok, strPubKey)
 }
 
 func VerifySignatureSHA256() {
 	var err error
 	var strAddress = "0x446DDa728Df7c3DDa88511f9622A9f6Ccb8c3b0F"
 	//var strPubKey = "03bba7449f02181303ac46b0c26ced45e1e9996044a8bfd0df3230743eb6bfb07a"
-	var strMsg = "hello world"
+	var strMsg = helloworld
 	var strSignature = "0xa1c64956c16cb09eb9aef3a05a95b41ea0c9f70d78c5034357c135ac39fb08a337766033ad61c87bca068ad895b221dc37fda04fa181f5235e7077e5ad0aabcb00"
 
 	var ok bool
@@ -79,7 +86,7 @@ func WalletSignAndVerify() {
 	//var wv = wallet.NewWalletEthereum(wallet.OpType_Verify, wc.GetPublicKey())
 	//log.Infof("[VERIFY] public key [%s]", wv.GetPublicKey())
 
-	var strHelloWorld = "hello world"
+	var strHelloWorld = "helloworld world"
 	strMsgHash, strSignature, err := wc.SignText([]byte(strHelloWorld))
 	if err != nil {
 		log.Errorf("sign failed [%s]", err.Error())
