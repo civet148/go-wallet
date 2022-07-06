@@ -1,12 +1,13 @@
 package wallet
 
 import (
-	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
 	"github.com/civet148/log"
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
+	"golang.org/x/crypto/sha3"
 	"strings"
 )
 
@@ -20,7 +21,8 @@ func DecodeHexString(s string) (b []byte, err error) {
 	return
 }
 
-func VerifySignatureKeccak256(strAddress, strMsg, strSignature string) (bool, error) {
+//VerifyKeccak256 for metamask eth_sign signature verification
+func VerifyKeccak256(strAddress, strMsg, strSignature string) (bool, error) {
 	sig, err := DecodeHexString(strSignature)
 	if err != nil {
 		log.Errorf("decode hex error [%s]", err)
@@ -38,9 +40,10 @@ func VerifySignatureKeccak256(strAddress, strMsg, strSignature string) (bool, er
 	return strings.EqualFold(strAddress, recoveredAddr.Hex()), nil
 }
 
-func VerifySignatureSHA256(strAddress, strMsg, strSignature string) (bool, error) {
+//VerifyLegacyKeccak256 for BCOS signature verification
+func VerifyLegacyKeccak256(strAddress, strMsg, strSignature string) (bool, error) {
 
-	strPubKey, err := RecoverPubKeySHA256(strMsg, strSignature)
+	strPubKey, err := RecoverLegacyKeccak256Msg(strMsg, strSignature)
 	if err != nil {
 		log.Errorf(err.Error())
 		return false, err
@@ -53,12 +56,19 @@ func VerifySignatureSHA256(strAddress, strMsg, strSignature string) (bool, error
 	return strings.EqualFold(strAddr, strAddress), nil
 }
 
-func SignHash(text string) (strMsgHash string) {
-	digestHash := sha256.Sum256([]byte(text))
-	return hex.EncodeToString(digestHash[:])
+func LegacyKeccak256Hash(data []byte) string {
+	hasher := sha3.NewLegacyKeccak256()
+	hasher.Write(data)
+	return hex.EncodeToString(hasher.Sum(nil))
 }
 
-func RecoverPubKeyKeccak256(strMsg, strSignature string) (string, error) {
+func PersonalSignHash(data []byte) string {
+	msg := fmt.Sprintf("\x19Ethereum Signed Message:\n%d%s", len(data), string(data))
+	return LegacyKeccak256Hash([]byte(msg))
+}
+
+//RecoverKeccak256Msg for metamask eth_sign signature
+func RecoverKeccak256Msg(strMsg, strSignature string) (string, error) {
 	var publicKey []byte
 	sig, err := DecodeHexString(strSignature)
 	if err != nil {
@@ -76,9 +86,54 @@ func RecoverPubKeyKeccak256(strMsg, strSignature string) (string, error) {
 	return hex.EncodeToString(publicKey), nil
 }
 
-func RecoverPubKeySHA256(strMsg, strSignature string) (string, error) {
+
+func RecoverKeccak256Hash(strHash, strSignature string) (string, error) {
 	var publicKey []byte
-	strHash := SignHash(strMsg)
+	sig, err := DecodeHexString(strSignature)
+	if err != nil {
+		log.Errorf("decode hex error [%s]", err)
+		return "", err
+	}
+	msg , err := DecodeHexString(strHash)
+	if err != nil {
+		log.Errorf("decode hex error [%s]", err)
+		return "", err
+	}
+	sig[crypto.RecoveryIDOffset] -= 27 // Transform yellow paper V from 27/28 to 0/1
+
+	pubKeyECDSA, err := crypto.SigToPub(msg, sig)
+	if err != nil {
+		return "", err
+	}
+	publicKey = crypto.CompressPubkey(pubKeyECDSA)
+	return hex.EncodeToString(publicKey), nil
+}
+
+func RecoverLegacyKeccak256Msg(strMsg, strSignature string) (string, error) {
+	var publicKey []byte
+	strHash := LegacyKeccak256Hash([]byte(strMsg))
+	hash, err := DecodeHexString(strHash)
+	if err != nil {
+		log.Errorf("decode hex error [%s]", err)
+		return "", err
+	}
+	signature, err := DecodeHexString(strSignature)
+	if err != nil {
+		log.Errorf("decode hex error [%s]", err)
+		return "", err
+	}
+	pubKeyECDSA, err := crypto.SigToPub(hash, signature)
+	if err != nil {
+		log.Errorf("convert to ECDSA error [%s]", err)
+		return "", err
+	}
+	publicKey = crypto.CompressPubkey(pubKeyECDSA)
+	return hex.EncodeToString(publicKey), nil
+}
+
+
+func RecoverLegacyKeccak256Hash(strHash, strSignature string) (strPubKey string, err error) {
+	var publicKey []byte
 	hash, err := DecodeHexString(strHash)
 	if err != nil {
 		log.Errorf("decode hex error [%s]", err)

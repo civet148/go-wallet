@@ -9,6 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/miguelmota/go-ethereum-hdwallet"
 	"github.com/tyler-smith/go-bip39"
+	"golang.org/x/crypto/sha3"
 )
 
 const (
@@ -113,8 +114,20 @@ func (m *WalletEthereum) SignHash(digestHash []byte) (strSignature string, err e
 	return hex.EncodeToString(sign), nil
 }
 
+//MakeHash legacy keccak256 hash algorithm, return [32]byte
+func  (m *WalletEthereum) MakeHash(data []byte) []byte {
+	hasher := sha3.NewLegacyKeccak256()
+	hasher.Write(data)
+	return hasher.Sum(nil)
+}
+
+//MakeHashString legacy keccak256 hash algorithm return hex string
+func  (m *WalletEthereum) MakeHashString(data []byte) string {
+	return hex.EncodeToString(m.MakeHash(data))
+}
+
 func (m *WalletEthereum) SignText(text []byte) (strMsgHash, strSignature string, err error) {
-	digestHash := sha256.Sum256(text)
+	digestHash := m.MakeHash(text)
 	strMsgHash = hex.EncodeToString(digestHash[:])
 	if strSignature, err = m.SignHash(digestHash[:]); err != nil {
 		log.Errorf("sign hash error [%s]", err)

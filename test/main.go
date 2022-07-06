@@ -1,18 +1,8 @@
 package main
 
 import (
-	"encoding/hex"
 	"github.com/civet148/go-wallet"
 	"github.com/civet148/log"
-	"github.com/ethereum/go-ethereum/accounts"
-)
-
-const (
-	helloworld  = "hello world"
-	address     = "0xae020dE214129224de8d34434064f114678eA6f9"
-	private_key = "e2905ff2ccaa680a53a5521843a6c6ff30a63e65864af18f5f112dcbd8ea462f"
-	public_key  = "02e17dcff5febb6d37b5c3da9044d5710749eba832d18eca24c8600419cc0eac22"
-	phrase      = "skin power hedgehog dash erosion jealous vocal since focus announce topic sun"
 )
 
 type Person struct {
@@ -25,49 +15,42 @@ type Person struct {
 
 func main() {
 	VerifySignatureKeccak256()
-	//VerifySignatureSHA256()
-	//WalletSignAndVerify()
+	VerifySignatureLegacyKeccak256()
+	WalletSignAndVerify()
 }
 
-func VerifySignatureKeccak256() {
-	/*
-			{
-			  "address": "0x90Cfd4D61C9D4C63f2e4648229775ABa19ced8dF",
-			  "msg": "hello world",
-			  "hash": "d9eba16ed0ecae432b71fe008c98cc872bb4cc214d3220a36f365326cf807d68"
-		      "public_key":"023cd6123ca51e31614de89f025c765e215bcb8cba31ae674c3e100dd8d92d3767"
-			  "sig": "0983228ed80a496332c6719bf7377200dacf16558b2fb3946f2d8675c39b7e33283523e8772dd0c3e0cf3068e6ca1e347697af75eb654379d55c90fcb4f69eea1b",
-			  "version": "2"
-			}
-	*/
-	var strMsg = helloworld
-	log.Infof("hash [%s]", hex.EncodeToString(accounts.TextHash([]byte(strMsg))))
-
-	var ok bool
-	var err error
-	var strAddress = "0x90Cfd4D61C9D4C63f2e4648229775ABa19ced8dF"
-	var strSignature = "0983228ed80a496332c6719bf7377200dacf16558b2fb3946f2d8675c39b7e33283523e8772dd0c3e0cf3068e6ca1e347697af75eb654379d55c90fcb4f69eea1b"
-	strPubKey, _ := wallet.RecoverPubKeyKeccak256(strMsg, strSignature)
-	if ok, err = wallet.VerifySignatureKeccak256(strAddress, strMsg, strSignature); err != nil {
-		log.Errorf("verify message failed")
-		return
-	}
-	log.Infof("verify message [%v] public key [%s]", ok, strPubKey)
-}
-
-func VerifySignatureSHA256() {
-	var err error
-	var strAddress = "0x446DDa728Df7c3DDa88511f9622A9f6Ccb8c3b0F"
-	//var strPubKey = "03bba7449f02181303ac46b0c26ced45e1e9996044a8bfd0df3230743eb6bfb07a"
-	var strMsg = helloworld
-	var strSignature = "0xa1c64956c16cb09eb9aef3a05a95b41ea0c9f70d78c5034357c135ac39fb08a337766033ad61c87bca068ad895b221dc37fda04fa181f5235e7077e5ad0aabcb00"
-
-	var ok bool
-	if ok, err = wallet.VerifySignatureSHA256(strAddress, strMsg, strSignature); err != nil {
+func VerifySignatureLegacyKeccak256() {
+	strHash := "924a14c42641d860962d8f19f6e4e147631b3f4b8745b57b07552db07a78f04f"
+	strSig := "0df090d0600ad3387c0a8aa61ba9bf5127f88dc6fa2cb8e6d41b354f1f1cd9dd0ea40c7fccec2edcfd7c4296897a34a048084377b7cb6aa1f7b7b15015b5c2d100" //data app
+	strPubKey, err := wallet.RecoverLegacyKeccak256Hash(strHash, strSig)
+	if err != nil {
 		log.Errorf("%s", err)
 		return
 	}
-	log.Infof("verify message [%v]", ok)
+	log.Infof("public key [%s]", strPubKey)
+	strAddress, err := wallet.PublicKey2Address(strPubKey)
+	if err != nil {
+		log.Errorf("%s", err)
+		return
+	}
+	log.Infof("address [%s]", strAddress)
+}
+
+func VerifySignatureKeccak256() {
+	strHash := "924a14c42641d860962d8f19f6e4e147631b3f4b8745b57b07552db07a78f04f"
+	strSig := "a580661c2356f8ce6be68204148b266f268b6b491f2eef1b3f05cdddad76ba7c6afdc629c3f6c4aefc8d5964984d58ba7f8aa6c3d1aadf30f0871d1758222eeb1c" //metamask
+	strPubKey, err := wallet.RecoverKeccak256Hash(strHash, strSig)
+	if err != nil {
+		log.Errorf("%s", err)
+		return
+	}
+	log.Infof("public key [%s]", strPubKey)
+	strAddress, err := wallet.PublicKey2Address(strPubKey)
+	if err != nil {
+		log.Errorf("%s", err)
+		return
+	}
+	log.Infof("address [%s]", strAddress)
 }
 
 func WalletSignAndVerify() {
@@ -99,46 +82,15 @@ func WalletSignAndVerify() {
 	} else {
 		log.Infof("verify signature ok")
 	}
-	//
-	//strPubKeyRecover, err := wallet.RecoverPubKey(strMsgHash, strSignature)
-	//if err != nil {
-	//	log.Errorf("RecoverPubKey error [%s]", err)
-	//	return
-	//}
-	//if strPubKeyRecover != wc.GetPublicKey() {
-	//	log.Errorf("public key [%s] not match [%s]", strPubKeyRecover, wc.GetPublicKey())
-	//	return
-	//}
-	//log.Infof("public key recover [%s] ok", strPubKeyRecover)
-	//
-	//var person = &Person{
-	//	Name:     "lory",
-	//	Age:      18,
-	//	City:     "NewYork",
-	//	District: "PJ.25",
-	//	Address:  "my hometown address",
-	//}
-	//log.Infof("struct to sign [%s]", wallet.MakeSignString(person))
-	//
-	//var values = url.Values{
-	//	"name":     []string{"lory"},
-	//	"age":      []string{"18"},
-	//	"city":     []string{"NewYork"},
-	//	"district": []string{"PJ.25"},
-	//	"address":  []string{"my hometown address"},
-	//}
-	//log.Infof("url.values to sign [%s]", wallet.MakeSignString(values))
-	//
-	//var m = map[string]interface{}{
-	//	"name":     "lory",
-	//	"age":      18,
-	//	"city":     "NewYork",
-	//	"district": "PJ.25",
-	//	"address":  "my hometown address",
-	//}
-	//log.Infof("map[string]interface{} to sign [%s]", wallet.MakeSignString(m))
-	//
-	//log.Infof("struct to sign hash [%s]", wallet.MakeSignSHA256Hex(person))
-	//log.Infof("url.values to sign hash [%s]", wallet.MakeSignSHA256Hex(values))
-	//log.Infof("map[string]interface{} to sign hash [%s]", wallet.MakeSignSHA256Hex(m))
+
+	strPubKeyRecover, err := wallet.RecoverLegacyKeccak256Hash(strMsgHash, strSignature)
+	if err != nil {
+		log.Errorf("RecoverPubKey error [%s]", err)
+		return
+	}
+	if strPubKeyRecover != wc.GetPublicKey() {
+		log.Errorf("public key [%s] not match [%s]", strPubKeyRecover, wc.GetPublicKey())
+		return
+	}
+	log.Infof("public key recover [%s] ok", strPubKeyRecover)
 }
