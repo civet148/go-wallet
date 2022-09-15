@@ -1,14 +1,30 @@
 package wallet
 
 import (
+	"encoding/base64"
 	"encoding/hex"
 	"fmt"
 	"github.com/civet148/log"
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/gagliardetto/solana-go"
+	"github.com/mr-tron/base58"
 	"golang.org/x/crypto/sha3"
 	"strings"
+)
+
+const (
+	//Number of bytes in a pubkey.
+	PublicKeyLength = 32
+	//Maximum length of derived pubkey seed.
+	MaxSeedLength = 32
+	//Maximum number of seeds.
+	MaxSeeds = 16
+	//Number of bytes in a signature.
+	SignatureLength = 64
+	//Maximum string length of a base58 encoded pubkey.
+	MaxBase58Length = 44
 )
 
 func DecodeHexString(s string) (b []byte, err error) {
@@ -20,6 +36,23 @@ func DecodeHexString(s string) (b []byte, err error) {
 	}
 	return
 }
+
+
+//VerifySignatureSolana for Solana phantom signature verification
+//strAddress base58 encoded public key
+//strSignature base58 encoded signature
+//strMsg base64 encoded message
+func VerifySignatureSolana(strAddress, strMsg, strSignature string) (bool, error) {
+	sig := solana.MustSignatureFromBase58(strSignature)
+	addr := solana.MustPublicKeyFromBase58(strAddress)
+	msg, err := base64.StdEncoding.DecodeString(strMsg)
+	if err != nil {
+		log.Errorf(err.Error())
+		return false, err
+	}
+	return sig.Verify(addr, msg), nil
+}
+
 
 //VerifyKeccak256 for metamask eth_sign signature verification
 func VerifyKeccak256(strAddress, strMsg, strSignature string) (bool, error) {
@@ -175,4 +208,27 @@ func PublicKey2Address(strPublicKey string) (string, error) {
 
 	addr := crypto.PubkeyToAddress(*pubKeyECDSA)
 	return addr.Hex(), nil
+}
+
+
+func signatureFromBase58(in string) (out solana.Signature, err error) {
+	val, err := base58.Decode(in)
+	if err != nil {
+		return
+	}
+
+	if len(val) != SignatureLength {
+		err = fmt.Errorf("invalid length, expected 64, got %d", len(val))
+		return
+	}
+	copy(out[:], val)
+	return
+}
+
+func MustSignatureFromBase58(in string) solana.Signature {
+	out, err := signatureFromBase58(in)
+	if err != nil {
+		panic(err)
+	}
+	return out
 }
